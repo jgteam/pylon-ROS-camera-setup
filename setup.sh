@@ -5,24 +5,33 @@
 
 # More info: https://github.com/basler/pylon-ros-camera
 
+# Script is written for the noetic distro
+
+ROS_INSTALLATION_PACKAGE=ros-noetic-ros-base
+# All suitable options: ros-noetic-desktop-full, ros-noetic-desktop, ros-noetic-ros-base, ros-noetic-ros-core
+
 BLUE='\033[1;34m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
+GREEN='\033[1;32m'
 RESET='\033[0m'
 OUTPUT_SIG="${BLUE}[P-R-C Setup]"
 OUTPUT_SIG_E="${RED}[P-R-C Setup ERROR]"
 OUTPUT_SIG_W="${YELLOW}[P-R-C Setup NOTICE]"
-
+OUTPUT_SIG_F="${GREEN}[P-R-C Setup]"
 
 # Feedback function
-p () {
+p () { # Print
 	echo -e "$OUTPUT_SIG $1 $RESET"
 }
-e () {
+e () { # Error
 	echo -e "$OUTPUT_SIG_E $1 $RESET"
 }
-w () {
+w () { # Warning / Notice
 	echo -e "$OUTPUT_SIG_W $1 $RESET"
+}
+f () { # Finished
+	echo -e "$OUTPUT_SIG_F $1 $RESET"
 }
 
 # Getting the right permissions
@@ -91,31 +100,46 @@ then
 fi
 w "\$WSDIR set to $WSDIR"
 
-p "Enter ROS_DISTRO (e.g. 'noetic'). It will be set to noetic if left empty."
-echo -e -n "$OUTPUT_SIG Workspace> $RESET"
-read ROS_DISTRO
-if [ -z "$ROS_DISTRO" ]
-then
-	ROS_DISTRO=noetic
-fi
+
 w "\$ROS_DISTRO set to $ROS_DISTRO"
 
 
 check_installation "git" "git --version" "sudo apt-get -y install git"
 check_installation "pip" "pip --version" "sudo apt-get -y install python3-pip"
 check_installation "rosdep" "rosdep --version" "sudo pip install rosdep"
+check_installation "curl" "curl --version" "sudo apt-get -y install curl"
 
 run "sudo mkdir -p ${WSDIR}/src"
 run "cd ${WSDIR}/src"
 run "git clone https://github.com/basler/pylon-ros-camera"
 run "git clone https://github.com/dragandbot/dragandbot_common.git"
 run "echo 'deb http://packages.ros.org/ros/ubuntu focal main' | sudo tee /etc/apt/sources.list.d/ros-focal.list"
+run "sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654"
+run "curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | sudo apt-key add -"
+
+w "\$ROS_INSTALLATION_PACKAGE set to $ROS_INSTALLATION_PACKAGE"
+
+run "sudo sh -c 'echo source /opt/ros/noetic/setup.bash >> ~/.bashrc'"
+run "source ~/.bashrc"
+
+w "\$ROS_DISTRO set to $ROS_DISTRO"
+
 try "sudo rosdep init"
 run "rosdep update"
-run "sudo sh -c 'echo 'yaml https://raw.githubusercontent.com/basler/pylon-ros-camera/master/pylon_camera/rosdep/pylon_sdk.yaml' > /etc/ros/rosdep/sources.list.d/30-pylon_camera.list' "
+run "sudo sh -c 'echo yaml https://raw.githubusercontent.com/basler/pylon-ros-camera/master/pylon_camera/rosdep/pylon_sdk.yaml > /etc/ros/rosdep/sources.list.d/30-pylon_camera.list' "
 run "rosdep update"
-run "echo 'set(PYLON_ROOT \"/opt/pylon\")' >> pylon-ros-camera/pylon_camera/cmake/FindPylon.cmake"
-run "echo ${ROS_DISTRO}"
+TMP_PYLON_ROOT="'set(PYLON_ROOT '/opt/pylon')'"
+run "echo ${TMP_PYLON_ROOT} >> pylon-ros-camera/pylon_camera/cmake/FindPylon.cmake"
 run "sudo -E rosdep install --from-paths . --ignore-src --rosdistro=${ROS_DISTRO} -y"
+run "cd .."
+run "catkin_make clean"
+run "catkin_make"
 
+SCRIPT=`realpath $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
+run "sudo sh -c 'echo source ${SCRIPT}/devel/setup.bash >> ~/.bashrc'"
+run "source ~/.bashrc"
+
+f "Installation finished! You can run now\n\n	roslaunch pylon_camera pylon_camera_node.launch\n	roslaunch pylon_camera pylon_camera_ip_configuration.launch"
 
