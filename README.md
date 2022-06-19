@@ -21,6 +21,8 @@ Execute:
 
 or download the ```setup.sh``` manually and run it.
 
+**You will need to run this script as NON-ROOT USER!** 
+
 ## Manual installation
 
 1. Make sure to have git, python3, pip and curl installed (`sudo apt-get install git python3 python3-pip curl`)
