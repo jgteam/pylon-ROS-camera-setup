@@ -10,3 +10,5 @@ More information: https://github.com/basler/pylon-ros-camera
 - curl
 
 ## Installation Script
+
+```wget -O - https://raw.githubusercontent.com/jgteam/pylon-ROS-camera-setup/main/setup.sh | bash```
