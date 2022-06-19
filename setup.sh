@@ -102,8 +102,7 @@ w "\$ROS_INSTALLATION_PACKAGE set to $ROS_INSTALLATION_PACKAGE"
 p "Enter workspace directory (e.g. 'catkin_ws'). It will be created if it does not exist."
 echo -e -n "$OUTPUT_SIG Workspace> $RESET"
 read WSDIR
-if [ -z "$WSDIR" ]
-then
+if [ -z "$WSDIR" ]; then
 	e "Workspace directory cannot be empty!"
 	exit 1
 fi
