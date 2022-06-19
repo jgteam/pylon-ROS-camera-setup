@@ -89,7 +89,7 @@ check_installation () {
 add_source () {
 
 	run "source $1"
-	run "sudo sh -c 'echo source $1 >> ~/.bashrc'"
+	run "echo source $1 >> ~/.bashrc"
 	run "source ~/.bashrc"
 
 }
@@ -102,8 +102,7 @@ w "\$ROS_INSTALLATION_PACKAGE set to $ROS_INSTALLATION_PACKAGE"
 p "Enter workspace directory (e.g. 'catkin_ws'). It will be created if it does not exist."
 echo -e -n "$OUTPUT_SIG Workspace> $RESET"
 read WSDIR
-if [ -z "$WSDIR" ]
-then
+if [ -z "$WSDIR" ]; then
 	e "Workspace directory cannot be empty!"
 	exit 1
 fi
@@ -137,8 +136,7 @@ run "rosdep update"
 TMP_PYLON_ROOT="'set(PYLON_ROOT '/opt/pylon')'"
 run "echo ${TMP_PYLON_ROOT} >> pylon-ros-camera/pylon_camera/cmake/FindPylon.cmake"
 run "source ~/.bashrc"
-if [ -z "$ROS_DISTRO" ]
-then
+if [ -z "$ROS_DISTRO" ]; then
 	e "\$ROS_DISTRO NOT SET!"
 	w "Using 'noetic' as distro!"
 	ROS_DISTRO=noetic
@@ -150,9 +148,8 @@ run "catkin_make clean"
 run "catkin_make"
 
 SCRIPT=`realpath $0`
-echo ${SCRIPT}
 SCRIPTPATH=`dirname $SCRIPT`
 add_source "${SCRIPTPATH}/devel/setup.bash"
 
 f "Installation finished! You can run now\n\n	roslaunch pylon_camera pylon_camera_node.launch\n	roslaunch pylon_camera pylon_camera_ip_configuration.launch"
-
+w "You have to open up a fresh terminal OR need to execute 'source ~/.bashrc' in this one to access all commands!"
