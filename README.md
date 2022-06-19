@@ -11,4 +11,4 @@ More information: https://github.com/basler/pylon-ros-camera
 
 ## Installation Script
 
-```wget -O - https://raw.githubusercontent.com/jgteam/pylon-ROS-camera-setup/main/setup.sh | bash```
+```wget -O - https://raw.githubusercontent.com/jgteam/pylon-ROS-camera-setup/main/setup.sh | bash <(cat) </dev/tty```
