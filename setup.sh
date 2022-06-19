@@ -49,25 +49,25 @@ fi
 
 # Some helpful functions
 run () {
+	p "Executing command: \n	$1"
+	
 	eval "$1"
 
 	if [ $? -ne 0 ]; then
 		e "Last command did not succeed... quitting."
 		e "FAILED CMD: \n\n	$1\n"
 		exit 1
-	else
-		p "Finished command: \n	$1"
 	fi
 }
 
 try () {
+	p "Executing command: \n	$1"
+
 	eval "$1"
 
 	if [ $? -ne 0 ]; then
 		w "Last command did not succeed... "
 		w "FAILED CMD: \n\n	$1\n"
-	else
-		p "Finished command: \n	$1"
 	fi
 }
 
@@ -83,6 +83,14 @@ check_installation () {
 	else 
 		p "$1 found."
 	fi
+
+}
+
+add_source () {
+
+	run "source $1"
+	run "sudo sh -c 'echo source $1 >> ~/.bashrc'"
+	run "source ~/.bashrc"
 
 }
 
@@ -102,10 +110,8 @@ fi
 w "\$WSDIR set to $WSDIR"
 
 
-w "\$ROS_DISTRO set to $ROS_DISTRO"
-
-
 check_installation "git" "git --version" "sudo apt-get -y install git"
+check_installation "python3" "python3 --version" "sudo apt-get -y install python3"
 check_installation "pip" "pip --version" "sudo apt-get -y install python3-pip"
 check_installation "rosdep" "rosdep --version" "sudo pip install rosdep"
 check_installation "curl" "curl --version" "sudo apt-get -y install curl"
@@ -121,27 +127,32 @@ run "sudo apt-get -y update"
 
 run "sudo apt-get -y install $ROS_INSTALLATION_PACKAGE"
 
-run "sudo sh -c 'echo source /opt/ros/noetic/setup.bash >> ~/.bashrc'"
-run "source ~/.bashrc"
+add_source "/opt/ros/noetic/setup.bash"
 
-w "\$ROS_DISTRO set to $ROS_DISTRO"
 
 try "sudo rosdep init"
-run "rosdep update"
+#run "rosdep update"
 run "sudo sh -c 'echo yaml https://raw.githubusercontent.com/basler/pylon-ros-camera/master/pylon_camera/rosdep/pylon_sdk.yaml > /etc/ros/rosdep/sources.list.d/30-pylon_camera.list' "
 run "rosdep update"
 TMP_PYLON_ROOT="'set(PYLON_ROOT '/opt/pylon')'"
 run "echo ${TMP_PYLON_ROOT} >> pylon-ros-camera/pylon_camera/cmake/FindPylon.cmake"
+run "source ~/.bashrc"
+if [ -z "$ROS_DISTRO" ]
+then
+	e "\$ROS_DISTRO NOT SET!"
+	w "Using 'noetic' as distro!"
+	ROS_DISTRO=noetic
+fi
+w "\$ROS_DISTRO set to $ROS_DISTRO"
 run "sudo -E rosdep install --from-paths . --ignore-src --rosdistro=$ROS_DISTRO -y"
 run "cd .."
 run "catkin_make clean"
 run "catkin_make"
 
 SCRIPT=`realpath $0`
+echo ${SCRIPT}
 SCRIPTPATH=`dirname $SCRIPT`
-
-run "sudo sh -c 'echo source ${SCRIPT}/devel/setup.bash >> ~/.bashrc'"
-run "source ~/.bashrc"
+add_source "${SCRIPTPATH}/devel/setup.bash"
 
 f "Installation finished! You can run now\n\n	roslaunch pylon_camera pylon_camera_node.launch\n	roslaunch pylon_camera pylon_camera_ip_configuration.launch"
 
