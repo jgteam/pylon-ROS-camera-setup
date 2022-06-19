@@ -136,8 +136,7 @@ run "rosdep update"
 TMP_PYLON_ROOT="'set(PYLON_ROOT '/opt/pylon')'"
 run "echo ${TMP_PYLON_ROOT} >> pylon-ros-camera/pylon_camera/cmake/FindPylon.cmake"
 run "source ~/.bashrc"
-if [ -z "$ROS_DISTRO" ]
-then
+if [ -z "$ROS_DISTRO" ]; then
 	e "\$ROS_DISTRO NOT SET!"
 	w "Using 'noetic' as distro!"
 	ROS_DISTRO=noetic
