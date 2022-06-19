@@ -88,6 +88,7 @@ check_installation () {
 
 # Beginning of setup
 
+w "\$ROS_INSTALLATION_PACKAGE set to $ROS_INSTALLATION_PACKAGE"
 # Get Workspace dir:
 
 p "Enter workspace directory (e.g. 'catkin_ws'). It will be created if it does not exist."
@@ -109,15 +110,16 @@ check_installation "pip" "pip --version" "sudo apt-get -y install python3-pip"
 check_installation "rosdep" "rosdep --version" "sudo pip install rosdep"
 check_installation "curl" "curl --version" "sudo apt-get -y install curl"
 
-run "sudo mkdir -p ${WSDIR}/src"
+run "mkdir -p ${WSDIR}/src"
 run "cd ${WSDIR}/src"
 run "git clone https://github.com/basler/pylon-ros-camera"
 run "git clone https://github.com/dragandbot/dragandbot_common.git"
 run "echo 'deb http://packages.ros.org/ros/ubuntu focal main' | sudo tee /etc/apt/sources.list.d/ros-focal.list"
 run "sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654"
 run "curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | sudo apt-key add -"
+run "sudo apt-get -y update"
 
-w "\$ROS_INSTALLATION_PACKAGE set to $ROS_INSTALLATION_PACKAGE"
+run "sudo apt-get -y install $ROS_INSTALLATION_PACKAGE"
 
 run "sudo sh -c 'echo source /opt/ros/noetic/setup.bash >> ~/.bashrc'"
 run "source ~/.bashrc"
@@ -130,7 +132,7 @@ run "sudo sh -c 'echo yaml https://raw.githubusercontent.com/basler/pylon-ros-ca
 run "rosdep update"
 TMP_PYLON_ROOT="'set(PYLON_ROOT '/opt/pylon')'"
 run "echo ${TMP_PYLON_ROOT} >> pylon-ros-camera/pylon_camera/cmake/FindPylon.cmake"
-run "sudo -E rosdep install --from-paths . --ignore-src --rosdistro=${ROS_DISTRO} -y"
+run "sudo -E rosdep install --from-paths . --ignore-src --rosdistro=$ROS_DISTRO -y"
 run "cd .."
 run "catkin_make clean"
 run "catkin_make"
