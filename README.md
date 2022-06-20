@@ -1,5 +1,5 @@
 # pylon-ROS-camera-setup
-Improved installation setup for the pylon ROS driver 
+Improved installation setup for the pylon ROS driver needed by FaSTDa Driverless.
 
 More information: https://github.com/basler/pylon-ros-camera
 
